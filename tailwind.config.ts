@@ -63,7 +63,8 @@ const config = {
                                 narrowed: 'hsl(var(--status-narrowed))',
                                 obstructed: 'hsl(var(--status-obstructed))',
                                 repressed: 'hsl(var(--status-repressed))',
-                                closed: 'hsl(var(--status-closed))'
+                                closed: 'hsl(var(--status-closed))',
+                                unknown: 'hsl(var(--status-unknown))'
                         },
                         chart: {
                                 '1': 'hsl(var(--chart-1))',
