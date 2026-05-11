@@ -1,68 +1,82 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import Link from "next/link"
 
+import { countries, CountryStatus, statusLabels } from "@/lib/countries"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
-const countries = [
-  { value: "senegal", label: "Senegal" },
-  { value: "nigeria", label: "Nigeria" },
-  { value: "kenya", label: "Kenya" },
-  { value: "ghana", label: "Ghana" },
-  { value: "south-africa", label: "South Africa" },
-  { value: "cote-divoire", label: "Ivory Coast" },
-  { value: "cameroon", label: "Cameroon" },
-  { value: "mali", label: "Mali" },
-  { value: "burkina-faso", label: "Burkina Faso" },
-  { value: "tanzania", label: "Tanzania" },
+const statuses: Array<CountryStatus | "all"> = [
+  "all",
+  "open",
+  "narrowed",
+  "obstructed",
+  "repressed",
+  "closed",
+  "unknown",
 ]
 
-interface CountrySelectorProps {
-  onSelect: (value: string) => void
+const statusTextColor: Record<CountryStatus, string> = {
+  open: "text-white",
+  narrowed: "text-black",
+  obstructed: "text-white",
+  repressed: "text-white",
+  closed: "text-white",
+  unknown: "text-black",
 }
 
-export function CountrySelector({ onSelect }: CountrySelectorProps) {
-  const [open, setOpen] = React.useState(false)
-  const [value, setValue] = React.useState("")
+export function CountrySelector() {
+  const [activeTab, setActiveTab] = React.useState<CountryStatus | "all">("all")
 
-  const handleSelect = React.useCallback(
-    (currentValue: string) => {
-      setValue(currentValue)
-      onSelect(currentValue)
-      setOpen(false)
-    },
-    [onSelect],
-  )
+  const filtered =
+    activeTab === "all" ? countries : countries.filter((c) => c.status === activeTab)
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between">
-          {value ? countries.find((country) => country.value === value)?.label : "Select a country..."}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
-        <Command>
-          <CommandInput placeholder="Search for a country..." />
-          <CommandList>
-            <CommandEmpty>No country found.</CommandEmpty>
-            <CommandGroup>
-              {countries.map((country) => (
-                <CommandItem key={country.value} value={country.value} onSelect={handleSelect}>
-                  <Check className={cn("mr-2 h-4 w-4", value === country.value ? "opacity-100" : "opacity-0")} />
-                  {country.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <Tabs
+      value={activeTab}
+      onValueChange={(v) => setActiveTab(v as CountryStatus | "all")}
+      className="w-full"
+    >
+      <TabsList className="flex flex-wrap h-auto gap-1 mb-4">
+        {statuses.map((s) => (
+          <TabsTrigger key={s} value={s} className="capitalize">
+            {s === "all" ? "All" : statusLabels[s]}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+
+      <div
+        role="list"
+        aria-label="Countries"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+      >
+        {filtered.map((country) => (
+          <Link
+            key={country.code}
+            href={`/countries/${country.code}`}
+            role="listitem"
+            className={cn(
+              "group block rounded-lg border p-4 shadow-sm transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              "bg-card text-card-foreground"
+            )}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-medium">{country.name}</span>
+              <Badge
+                className={cn(
+                  "shrink-0 border-none capitalize",
+                  `status-${country.status}`,
+                  statusTextColor[country.status]
+                )}
+              >
+                {statusLabels[country.status]}
+              </Badge>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </Tabs>
   )
 }
-

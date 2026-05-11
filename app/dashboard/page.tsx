@@ -148,7 +148,7 @@ export default function DashboardPage() {
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium mb-1 block">Country</label>
-                <CountrySelector onSelect={() => {}} />
+                <CountrySelector />
               </div>
               <div>
                 <label className="text-sm font-medium mb-1 block">Year</label>
